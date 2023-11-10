@@ -53,4 +53,28 @@ export interface RawGraphQLRequestPluginConfig extends RawClientSideBasePluginCo
    * ```
    */
   extensionsType?: string;
+
+  /**
+   * @description Allows you to specify the exported `Sdk` type to resolve possible conflicts.
+   * @default "Sdk"
+   *
+   * @exampleMarkdown
+   * ```ts filename="codegen.ts"
+   *  import type { CodegenConfig } from '@graphql-codegen/cli';
+   *
+   *  const config: CodegenConfig = {
+   *    // ...
+   *    generates: {
+   *      'path/to/file.ts': {
+   *        plugins: ['typescript', 'typescript-operations', 'typescript-graphql-request'],
+   *        config: {
+   *          sdkType: 'MySdk'
+   *        },
+   *      },
+   *    },
+   *  };
+   *  export default config;
+   * ```
+   */
+  sdkType?: string;
 }

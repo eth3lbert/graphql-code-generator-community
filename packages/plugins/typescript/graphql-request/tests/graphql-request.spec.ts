@@ -374,6 +374,50 @@ async function test() {
     });
   });
 
+  it('Output Sdk type should respect config', async () => {
+    const config = { sdkType: 'MySdk' };
+    const docs = [{ location: '', document: basicDoc }];
+    const result = (await plugin(schema, docs, config, {
+      outputFile: 'graphql.ts',
+    })) as Types.ComplexPluginOutput;
+
+    const usage = `
+async function test() {
+  const Client = require('graphql-request').GraphQLClient;
+  const client = new Client('');
+  const sdk = getSdk(client);
+
+  await sdk.feed();
+  await sdk.feed3();
+  await sdk.feed4();
+
+  const result = await sdk.feed2({ v: "1" });
+
+  if (result.feed) {
+    if (result.feed[0]) {
+      const id = result.feed[0].id
+    }
+  }
+}`;
+    const output = await validate(result, config, docs, schema, usage);
+
+    expect(output).toContain(`export type MySdk = ReturnType<typeof getSdk>;`);
+    expect(output).toMatchSnapshot();
+  });
+
+  it('Should throw if given empty sdkType', async () => {
+    const config = { sdkType: '' };
+    const docs = [{ location: '', document: basicDoc }];
+    try {
+      await plugin(schema, docs, config, {
+        outputFile: 'graphql.ts',
+      });
+      fail('Should throw');
+    } catch (err: unknown) {
+      expect(err).toMatchInlineSnapshot('[Error: `sdkType` cannot be empty]');
+    }
+  });
+
   describe('issues', () => {
     it('#5386 - should provide a nice error when dealing with anonymous operations', async () => {
       const doc = parse(/* GraphQL */ `

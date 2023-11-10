@@ -13,6 +13,7 @@ import { RawGraphQLRequestPluginConfig } from './config.js';
 export interface GraphQLRequestPluginConfig extends ClientSideBasePluginConfig {
   rawRequest: boolean;
   extensionsType: string;
+  sdkType: string;
 }
 
 const additionalExportedTypes = `
@@ -40,7 +41,12 @@ export class GraphQLRequestVisitor extends ClientSideBaseVisitor<
     super(schema, fragments, rawConfig, {
       rawRequest: getConfigValue(rawConfig.rawRequest, false),
       extensionsType: getConfigValue(rawConfig.extensionsType, 'any'),
+      sdkType: getConfigValue(rawConfig.sdkType, 'Sdk'),
     });
+
+    if (!this.config.sdkType) {
+      throw new Error('`sdkType` cannot be empty');
+    }
 
     autoBind(this);
 
@@ -161,6 +167,6 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
 ${allPossibleActions.join(',\n')}
   };
 }
-export type Sdk = ReturnType<typeof getSdk>;`;
+export type ${this.config.sdkType} = ReturnType<typeof getSdk>;`;
   }
 }
